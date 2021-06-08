@@ -3,7 +3,7 @@ from collections import Counter
 import pandas as pd
 from flashtext import KeywordProcessor
 import inflect
-from wb_nlp.dir_manager import get_data_dir
+from wb_cleaning.dir_manager import get_data_dir
 
 jdc_tags_processor = KeywordProcessor()
 inflect_engine = inflect.engine()
