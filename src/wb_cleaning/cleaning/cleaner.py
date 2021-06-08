@@ -14,11 +14,51 @@ import spacy
 from spacy.tokens import Doc
 import numpy as np
 
-from spacy_langdetect import LanguageDetector
+from spacy_langdetect import LanguageDetector, spacy_langdetect
+
+import fasttext
+from polyglot.detect import Detector
 
 from wb_cleaning.cleaning import stopwords, respelling
 from wb_cleaning.extraction import phrase
 # from wb_cleaning.extraction import extractor
+from wb_cleaning import dir_manager
+
+# Download fasttext language model from: https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.ftz
+FASTTEXT_LANG_MODEL = None
+
+
+def fasttext_detect_language(spacy_object):
+    global FASTTEXT_LANG_MODEL
+
+    if FASTTEXT_LANG_MODEL is None:
+        FASTTEXT_LANG_MODEL = fasttext.load_model(
+            dir_manager.get_path_from_root("models", "fasttext", "lid.176.ftz"))
+
+    ln, sc = FASTTEXT_LANG_MODEL.predict(spacy_object.text)
+    ln = ln[0].split('__')[-1]
+    sc = sc[0]
+    return {"language": str(ln), "score": float(sc)}
+
+
+def polyglot_detect_language(spacy_object):
+    lang = Detector(
+        ''.join(x for x in spacy_object.text if x.isprintable()), quiet=True)
+    lang = lang.language
+
+    return {"language": lang.code, "score": float(lang.confidence / 100)}
+
+
+def hybrid_detect_language(spacy_object):
+    lang = Detector(
+        ''.join(x for x in spacy_object.text if x.isprintable()), quiet=True)
+    if lang.reliable:
+        lang = lang.language
+        data = {"language": lang.code, "score": float(lang.confidence / 100)}
+    else:
+        data = spacy_langdetect._detect_language(spacy_object)
+
+    return data
 
 
 class DocLanguageDetector(LanguageDetector):
@@ -44,7 +84,8 @@ MAX_LENGTH = 1000000
 
 nlp = spacy.load("en_core_web_sm", disable=["parser"])
 nlp.Defaults.stop_words |= set(stopwords.stopwords)
-nlp.add_pipe(DocLanguageDetector(), name='language_detector', last=True)
+nlp.add_pipe(DocLanguageDetector(hybrid_detect_language),
+             name='language_detector', last=True)
 
 
 def expand_acronyms(text: str) -> str:
@@ -90,6 +131,10 @@ class BaseCleaner:
             .replace("“", '"')
             .replace("”", '"')
         )
+        # Special case
+        text = re.sub(r"(?i)\bcovid-19\b", "covid", text)
+        text = re.sub(r"(?i)\bcovid19\b", "covid", text)
+        text = re.sub(r"(?i)\bcovid\b", "covid", text)
 
         text = re.sub(r"\s+", " ", text).strip()[:MAX_LENGTH]
         doc = nlp(text)
@@ -157,7 +202,8 @@ class BaseCleaner:
         if self.config["cleaner"]["flags"]["correct_misspelling"]:
             tokens = self.spelling_model.fix_spellings(tokens)
 
-        return tokens
+        # Final removal of stop words
+        return [token for token in tokens if token not in nlp.Defaults.stop_words]
 
     def get_clean_text(self, text: str) -> str:
         """Cleans a given text.
@@ -382,15 +428,11 @@ class CorpusCleaner:
 
 if __name__ == "__main__":
     from wb_cleaning.utils.scripts import load_config
-    from wb_cleaning import dir_manager as cleaning_dir_manager
+    from wb_cleaning import dir_manager
     from wb_cleaning.types.cleaning import CleaningConfig
 
-
-    config = load_config(
-        cleaning_dir_manager.get_configs_dir(
-            "cleaning",
-            "default.yml"),
-            "cleaning_config", None)
+    config = load_config(dir_manager.get_path_from_root(
+        'configs', 'cleaning', 'default.yml'), 'cleaning_config', None)
 
     config = CleaningConfig(**config).dict()
     print(config)
