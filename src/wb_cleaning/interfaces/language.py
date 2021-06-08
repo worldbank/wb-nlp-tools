@@ -1,5 +1,5 @@
 import enchant
-from wb_nlp import dir_manager
+from wb_cleaning import dir_manager
 
 
 class Language:
