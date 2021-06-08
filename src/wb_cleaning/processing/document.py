@@ -33,7 +33,7 @@ class PDFDoc2Txt:
         pass
 
     def _parse(self, parser, content):
-        return parser(content, xmlContent=True, serverEndpoint=TIKA_SERVER_ENDPOINT)
+        return parser(content, xmlContent=True, serverEndpoint=TIKA_SERVER_ENDPOINT, requestOptions={"timeout": 600})
 
     def parse(self, source: Union[bytes, str], source_type: str = 'buffer') -> str:
         """Parse a PDF document to text from different source types.
@@ -63,12 +63,13 @@ class PDFDoc2Txt:
         else:
             raise ValueError(f'Unknown source_type: `{source_type}`')
 
-        soup = BeautifulSoup(pdf_text['content'], features="html.parser")
-        pages = soup.find_all('div', {'class': 'page'})
-
         text_pages = []
-        for page in pages:
-            text_pages.append(PDFDoc2Txt.process_page(page))
+        if pdf_text['content']:
+            soup = BeautifulSoup(pdf_text['content'], features="html.parser")
+            pages = soup.find_all('div', {'class': 'page'})
+
+            for page in pages:
+                text_pages.append(PDFDoc2Txt.process_page(page))
 
         return text_pages
 
