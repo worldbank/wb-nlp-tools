@@ -27,19 +27,19 @@ CLASSIFIERS = [
     "Programming Language :: Python"
 ]
 INSTALL_REQUIRES = [
-    "spacy==2.3.2",
-    "numpy==1.19.1",
+    "spacy>=2.3.5,<=2.3.7",
+    "numpy>=1.19.1,<=1.19.4",
     "spacy-langdetect==0.1.2",
     "wordninja==2.0.0",
-    "pandas==1.1.2",
-    "pyenchant==3.1.1",
-    "scipy==1.5.2",
-    "nltk==3.5",
-    "scikit-learn==0.23.2",
+    "pandas>=1.1.2,<=1.2.0",
+    "pyenchant>=3.1.1,<=3.2.0",
+    "scipy>1.5.2,<=1.5.4",
+    "nltk>=3.5,<=3.6.2",
+    "scikit-learn>0.23.2,<=0.24.0",
     "redis==3.5.3",
-    "joblib==0.16.0",
-    "bs4",
-    "requests==2.24.0",
+    "joblib>0.16.0,<=1.0.0",
+    "bs4<=4.9.1",
+    "requests>2.24.0,<=2.25.1",
     "tika==1.24",
     "googletrans==3.1.0a0"]
 
@@ -47,16 +47,16 @@ PACKAGE_DIR = {'': 'src'}
 
 # Setting up
 setup(
-        name=PACKAGE_NAME,
-        version=VERSION,
-        author=AUTHOR,
-        license=LICENSE,
-        url=URL,
-        description=DESCRIPTION,
-        long_description=LONG_DESCRIPTION,
-        long_description_content_type=LONG_DESC_TYPE,
-        install_requires=INSTALL_REQUIRES,
-        classifiers=CLASSIFIERS,
-        package_dir=PACKAGE_DIR,
-        packages=find_packages(include=['wb_cleaning'])
+    name=PACKAGE_NAME,
+    version=VERSION,
+    author=AUTHOR,
+    license=LICENSE,
+    url=URL,
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type=LONG_DESC_TYPE,
+    install_requires=INSTALL_REQUIRES,
+    classifiers=CLASSIFIERS,
+    package_dir=PACKAGE_DIR,
+    packages=find_packages(include=['wb_cleaning'])
 )
