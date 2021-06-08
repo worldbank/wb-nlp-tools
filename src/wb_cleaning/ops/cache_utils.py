@@ -66,6 +66,7 @@ except redis.ConnectionError:
 
         raise error
 
+
 def get_from_bucket(bucket_id, key):
     '''Wrapper function for hget.
     '''
