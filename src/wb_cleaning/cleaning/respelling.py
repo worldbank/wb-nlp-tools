@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 
 from enchant.checker import SpellChecker
-from enchant import Dict
 from joblib import Memory
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -20,11 +19,13 @@ import redis
 
 from wb_cleaning.cleaning.stopwords import stopwords
 from wb_cleaning import dir_manager
-
+from wb_cleaning.interfaces import language
 # Setup caching mechanism for speedup.
 # Take note that `get_suggestions` using enchant is
 # quite slow (~75% of the `cached_infer_correct_word` function).
+
 USE_JOBLIB_MEMORY = False
+# EN_DICT = None
 
 if not USE_JOBLIB_MEMORY:
     try:
@@ -43,7 +44,8 @@ if USE_JOBLIB_MEMORY:
     try:
         respeller_cache = Memory(RESPELLER_CACHE_LOCATION, verbose=0)
     except PermissionError:
-        RESPELLER_CACHE_LOCATION = dir_manager.get_data_dir('shm', 'respeller-cachedir')
+        RESPELLER_CACHE_LOCATION = dir_manager.get_data_dir(
+            'shm', 'respeller-cachedir')
 
         if not os.path.isdir(RESPELLER_CACHE_LOCATION):
             os.makedirs(RESPELLER_CACHE_LOCATION)
@@ -55,7 +57,28 @@ if USE_JOBLIB_MEMORY:
 # # Returns self without any form of caching.
 # cache_decorator = lambda f: f
 
-en_dict = Dict("en_US")
+#
+# en_dict = language.Language().get_en_dict()
+en_lang = language.Language()
+
+
+# def get_dict():
+#     # Use this since DictWithPWL fails when pickled/unpickled
+#     global EN_DICT
+#     if EN_DICT is None:
+#         EN_DICT = language.Language().get_en_dict()
+#     return EN_DICT
+
+# with open(dir_manager.get_data_dir("whitelists", "whitelists", "whitelist_words.txt")) as whitelist_words_file:
+
+#     for word in whitelist_words_file.readlines():
+#         word = word.strip()
+
+#         # add word to personal dictionary
+#         # en_us.add(word)
+
+#         # add word just for this session
+#         en_dict.add_to_session(word)
 
 
 @cache_decorator
@@ -70,7 +93,13 @@ def get_suggestions(word: str, **kwargs) -> list:
         A list containing the most likely correct words based on enchant's dictionary.
 
     """
-    return en_dict.suggest(word)
+
+    if en_lang.get_en_dict().check(word):
+        suggest = [word]
+    else:
+        suggest = en_lang.get_en_dict().suggest(word)
+
+    return suggest
 
 
 # @cache_decorator
@@ -94,7 +123,8 @@ def morph_word(word: str) -> str:
     """
     # word = word.replace(' ', '')  # Check if compound word suggestion matches the misspelled word
     # Perform this opperation to add more robustness to the matching
-    m_word = word + "".join(sorted(word))
+    # m_word = word + "".join(sorted(word))
+    m_word = word
 
     return m_word
 
@@ -143,10 +173,19 @@ def cached_infer_correct_word(
         use_suggest_score=use_suggest_score,
     )
 
-    if len(word) <= min_len:
+    if len(word) < min_len:
         return payload
 
     candidates = get_suggestions(word, argument_hash=word)
+    lowered_candidates = [i.lower() for i in candidates]
+
+    lword = word.lower()
+    if lword in set(lowered_candidates):
+        # This handles cases corresponding to countries
+        payload["correct_word"] = candidates[lowered_candidates.index(lword)]
+        payload["score"] = 1
+
+        return payload
 
     if use_suggest_score:
         suggest_score = 1 / rankdata(range(len(candidates))) ** 0.5
@@ -320,7 +359,7 @@ class Respeller:
 
         """
         is_valid = (
-            (word not in stopwords)
+            (word not in self.stopwords)
             and ((not word[0].isupper()) or self.allow_proper)
             and len(word) > 2
         )
@@ -409,7 +448,8 @@ class OptimizedSpellChecker(SpellChecker):
         spell_checker_conf = self.config['spell_checker']
 
         super().__init__(
-            lang=spell_checker_conf.get('lang', lang),
+            # spell_checker_conf.get('lang', lang),
+            lang=en_lang.get_en_dict(),
             text=spell_checker_conf.get('text', text),
             tokenize=spell_checker_conf.get('tokenize', tokenize),
             chunkers=spell_checker_conf.get('chunkers', chunkers),
@@ -512,6 +552,7 @@ class SpellingModels:
     @staticmethod
     def recover_segmented_words(raw_input: str, max_len: int = 5) -> str:
         """This algorithm processes and input text to detect and fix any malformed words.
+        This does not attempt to split contiguous words.
 
         Example:
             input: "million p rote c te d   by u n h c r Of the world's displaced"
@@ -528,6 +569,8 @@ class SpellingModels:
 
         # Handle plural form of acronyms, e.g., IDPs -> IDP
         raw_text = re.sub(r"(\W[A-Z]{2,})(s)(\W)", r"\1\3", raw_input)
+        # Add non-alpha character at the end.
+        raw_text = raw_text + ' '
 
         text = ""
 
