@@ -636,12 +636,12 @@ class MajorDocTypes(WBEnum):
     EMPTY = ""
 
     # From ADB
-    evaluation_document = "Evaluation Document"
+    # evaluation_document = "Evaluation Document"
 
     # From WB docs API curated list
     board_documents = "Board Documents"
-    country_focus = "Country Focus"
-    economic_and_sector_work = "Economic and Sector Work"
+    # country_focus = "Country Focus"
+    # economic_and_sector_work = "Economic and Sector Work"
     project_documents = "Project Documents"
     publications_and_research = "Publications and Research"
 
@@ -662,6 +662,13 @@ class MajorDocTypes(WBEnum):
         }
 
         value = mappings.get(value, value)
+
+        # Unification of major document types to Publications and Research
+        other_types = {"Evaluation Document",
+                       "Country Focus", "Economic and Sector Work"}
+
+        if value in other_types:
+            value = "Publications and Research"
 
         return value
 
