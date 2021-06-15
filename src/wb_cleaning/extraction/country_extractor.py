@@ -1,3 +1,4 @@
+from pathlib import Path
 import re
 from collections import Counter
 
@@ -10,6 +11,32 @@ country_code_processor = KeywordProcessor()
 country_group_processor = KeywordProcessor()
 
 
+def get_standardized_regions(iso_code="iso3c"):
+    assert iso_code in ["iso2c", "iso3c", "full"]
+
+    codelist_path = Path(get_data_dir(
+        "whitelists", "countries", "codelist.xlsx"))
+
+    standardized_regions_path = codelist_path.parent / "standardized_regions.xlsx"
+
+    if not standardized_regions_path.exists():
+
+        codelist = pd.read_excel(codelist_path)
+        iso_region = codelist[["country.name.en", "iso2c", "iso3c", "region"]]
+        standardized_regions = iso_region.dropna(
+            subset=["iso2c", "region"]).set_index("iso2c")
+
+        standardized_regions.to_excel(standardized_regions_path)
+    else:
+        standardized_regions = pd.read_excel(standardized_regions_path)
+
+    if iso_code != "full":
+        standardized_regions = standardized_regions.reset_index().set_index(iso_code)[
+            "region"].to_dict()
+
+    return standardized_regions
+
+
 def get_normalized_country_group_name(code):
     return [
         code,
@@ -18,6 +45,14 @@ def get_normalized_country_group_name(code):
         code.replace("_", " "),
     ]
 
+
+def get_country_counts_regions(counts):
+    return sorted({standardized_regions_iso3c.get(c) for c in counts if standardized_regions_iso3c.get(c)})
+
+
+standardized_regions_full = get_standardized_regions(iso_code="full")
+standardized_regions_iso3c = get_standardized_regions(iso_code="iso3c")
+valid_regions = sorted(standardized_regions_full["region"].unique())
 
 iso3166_3_country_info = pd.read_json(
     get_data_dir("maps", "iso3166-3-country-info.json"))
