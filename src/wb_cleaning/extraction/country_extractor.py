@@ -46,24 +46,6 @@ def get_normalized_country_group_name(code):
     ]
 
 
-def get_country_counts_regions(counts):
-    return sorted({standardized_regions_iso3c.get(c) for c in counts if standardized_regions_iso3c.get(c)})
-
-
-standardized_regions_full = get_standardized_regions(iso_code="full")
-standardized_regions_iso3c = get_standardized_regions(iso_code="iso3c")
-valid_regions = sorted(standardized_regions_full["region"].unique())
-
-iso3166_3_country_info = pd.read_json(
-    get_data_dir("maps", "iso3166-3-country-info.json"))
-
-country_groups_map = pd.read_excel(
-    get_data_dir("whitelists", "countries", "codelist.xlsx"),
-    sheet_name="groups_iso3c", header=1, index_col=1).drop("country.name.en", axis=1).apply(lambda col_ser: col_ser.dropna().index.dropna().tolist(), axis=0).to_dict()
-
-mapping = mappings.get_countries_mapping()
-
-
 def get_country_name_from_code(code):
     name = None
     detail = iso3166_3_country_info.get(code)
@@ -75,32 +57,6 @@ def get_country_name_from_code(code):
 
 def get_country_code_from_name(name):
     return mapping.get(name, {}).get("code")
-
-
-country_code_country_group_map = {}
-for cg, cl in country_groups_map.items():
-    for c in cl:
-        if c in country_code_country_group_map:
-            country_code_country_group_map[c].append(cg)
-        else:
-            country_code_country_group_map[c] = [cg]
-
-country_group_processor.add_keywords_from_dict(
-    {k: get_normalized_country_group_name(k) for k in country_groups_map})
-
-country_map = {}
-sep = "$"
-anchor_code = f"country-code"
-for cname, normed in mapping.items():
-    # Make sure to add a trailing space at the end of the code below.
-    # This guarantees that we isolate the token from symbols, e.g., comma, period, etc.
-    code = f"{anchor_code}{sep}{normed['code']} "
-    if code in country_map:
-        country_map[code].append(cname)
-    else:
-        country_map[code] = [cname]
-
-country_code_processor.add_keywords_from_dict(country_map)
 
 
 def replace_country_group_names(txt):
@@ -158,3 +114,47 @@ def get_country_count_details(counts):
 
 def get_detailed_country_counts(txt):
     return get_country_count_details(get_country_counts(txt))
+
+
+def get_country_counts_regions(counts):
+    return sorted({standardized_regions_iso3c.get(c) for c in counts if standardized_regions_iso3c.get(c)})
+
+
+standardized_regions_full = get_standardized_regions(iso_code="full")
+standardized_regions_iso3c = get_standardized_regions(iso_code="iso3c")
+valid_regions = sorted(standardized_regions_full["region"].unique())
+
+iso3166_3_country_info = pd.read_json(
+    get_data_dir("maps", "iso3166-3-country-info.json"))
+
+country_groups_map = pd.read_excel(
+    get_data_dir("whitelists", "countries", "codelist.xlsx"),
+    sheet_name="groups_iso3c", header=1, index_col=1).drop("country.name.en", axis=1).apply(lambda col_ser: col_ser.dropna().index.dropna().tolist(), axis=0).to_dict()
+
+mapping = mappings.get_countries_mapping()
+
+
+country_code_country_group_map = {}
+for cg, cl in country_groups_map.items():
+    for c in cl:
+        if c in country_code_country_group_map:
+            country_code_country_group_map[c].append(cg)
+        else:
+            country_code_country_group_map[c] = [cg]
+
+country_group_processor.add_keywords_from_dict(
+    {k: get_normalized_country_group_name(k) for k in country_groups_map})
+
+country_map = {}
+sep = "$"
+anchor_code = f"country-code"
+for cname, normed in mapping.items():
+    # Make sure to add a trailing space at the end of the code below.
+    # This guarantees that we isolate the token from symbols, e.g., comma, period, etc.
+    code = f"{anchor_code}{sep}{normed['code']} "
+    if code in country_map:
+        country_map[code].append(cname)
+    else:
+        country_map[code] = [cname]
+
+country_code_processor.add_keywords_from_dict(country_map)
