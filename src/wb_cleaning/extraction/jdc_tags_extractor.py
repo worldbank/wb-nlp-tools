@@ -4,6 +4,7 @@ import pandas as pd
 from flashtext import KeywordProcessor
 import inflect
 from wb_cleaning.dir_manager import get_data_dir
+from wb_cleaning.translate import translation
 
 jdc_tags_processor = KeywordProcessor()
 inflect_engine = inflect.engine()
@@ -20,7 +21,11 @@ inflect_engine = inflect.engine()
 # Occurences of these prototypes will be mapped to the tag keyword.
 
 
-def get_keywords_mapping(tags_sheet):
+# ["fr", "es"]):
+def get_keywords_mapping(tags_sheet, src="en", translate_to=None):
+    if translate_to is None:
+        translate_to = []
+
     tags_mapping = tags_sheet.set_index("tag_keyword").T.apply(
         # If prototypes have "underscores" create a copy with the underscore replaced with a space.
         lambda x: [[i] if "_" not in i else [i, i.replace("_", " ")] for i in x.dropna().tolist()] +
@@ -35,9 +40,14 @@ def get_keywords_mapping(tags_sheet):
     tags_mapping = tags_mapping.map(
         lambda x: x + [inflect_engine.plural(i) for i in x if "_" not in i])
 
+    if translate_to:
+        for dest in translate_to:
+            tags_mapping = tags_mapping.map(
+                lambda x: x + [translation.translate(i, src=src, dest=dest).get("translated") for i in x if "_" not in i])
+
     # Clean up the keywords to remove duplicates.
     tags_mapping = tags_mapping.map(
-        lambda x: sorted(set(x)))
+        lambda x: sorted(set(filter(lambda i: i, x))))
 
     return tags_mapping
 
