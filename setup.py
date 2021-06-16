@@ -27,6 +27,9 @@ CLASSIFIERS = [
     "Programming Language :: Python"
 ]
 INSTALL_REQUIRES = [
+    "inflect==5.3.0",
+    "flashtext>=2.7,<3.0.0",
+    "openpyxl==3.0.7",
     "spacy>=2.3.5,<=2.3.7",
     "numpy>=1.19.1,<=1.19.4",
     "spacy-langdetect==0.1.2",
