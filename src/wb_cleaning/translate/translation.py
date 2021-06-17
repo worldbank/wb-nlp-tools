@@ -71,7 +71,7 @@ def translate_shell(text, src='auto', dest='en'):
 
         clang = list(filter(lambda x: x["name"]
                      == detected_src, language_codes))
-        print(clang)
+        print(text, translated, clang)
         if clang:
             detected_src = clang[0]["code"]
         else:
@@ -93,3 +93,14 @@ def translate_shell(text, src='auto', dest='en'):
     )
 
     return payload
+
+
+def translate_list(texts, src='auto', dest='en'):
+    text = "\n".join(texts)
+    output = translate_shell(text, src=src, dest=dest)
+
+    translated = output.get("translated") or []
+    if translated:
+        translated = [i.strip() for i in translated.split("\n")]
+
+    return translated

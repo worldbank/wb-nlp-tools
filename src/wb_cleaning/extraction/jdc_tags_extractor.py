@@ -22,7 +22,7 @@ inflect_engine = inflect.engine()
 
 
 # ["fr", "es"]):
-def get_keywords_mapping(tags_sheet, src="en", translate_to=None):
+def get_keywords_mapping(tags_sheet, src="en", translate_to=["fr", "es"]):
     if translate_to is None:
         translate_to = []
 
@@ -42,8 +42,11 @@ def get_keywords_mapping(tags_sheet, src="en", translate_to=None):
 
     if translate_to:
         for dest in translate_to:
+            # tags_mapping = tags_mapping.map(
+            #     lambda x: x + [translation.translate_shell(i, src=src, dest=dest).get("translated") for i in x if "_" not in i])
+
             tags_mapping = tags_mapping.map(
-                lambda x: x + [translation.translate(i, src=src, dest=dest).get("translated") for i in x if "_" not in i])
+                lambda x: x + translation.translate_list([i for i in x if "_" not in i], src=src, dest=dest))
 
     # Clean up the keywords to remove duplicates.
     tags_mapping = tags_mapping.map(
