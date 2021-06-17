@@ -27,6 +27,7 @@ CLASSIFIERS = [
     "Programming Language :: Python"
 ]
 INSTALL_REQUIRES = [
+    "unidecode",
     "inflect==5.3.0",
     "flashtext>=2.7,<3.0.0",
     "openpyxl==3.0.7",

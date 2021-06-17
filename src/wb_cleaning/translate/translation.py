@@ -2,9 +2,12 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-import requests
+
+from unidecode import unidecode
+
 import googletrans
 from googletrans import client as gt
+import requests
 
 from wb_cleaning import dir_manager
 assert googletrans.__version__ == "3.1.0-alpha"
@@ -95,12 +98,15 @@ def translate_shell(text, src='auto', dest='en'):
     return payload
 
 
-def translate_list(texts, src='auto', dest='en'):
+def translate_list(texts, src='auto', dest='en', remove_accents=False):
     text = "\n".join(texts)
     output = translate_shell(text, src=src, dest=dest)
 
     translated = output.get("translated") or []
     if translated:
+        if remove_accents:
+            translated = unidecode(translated, "utf-8")
+
         translated = [i.strip() for i in translated.split("\n")]
 
     return translated
