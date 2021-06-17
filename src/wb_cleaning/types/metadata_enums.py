@@ -21,8 +21,7 @@ def get_wb_curated_list(list_id):
     b = BeautifulSoup(r.content, 'html.parser')
 
     item_list = b.find('select', id=list_id).find_all('option')
-    g = {re.sub(r'[^a-z]+', '_', o.text.lower()).strip('_')
-                : o.text for o in item_list}
+    g = {re.sub(r'[^a-z]+', '_', o.text.lower()).strip('_'): o.text for o in item_list}
 
     for k, v in g.items():
         print(f'{k} = "{v}"')
@@ -643,7 +642,8 @@ class MajorDocTypes(WBEnum):
     # country_focus = "Country Focus"
     # economic_and_sector_work = "Economic and Sector Work"
     project_documents = "Project Documents"
-    publications_and_research = "Publications and Research"
+    # publications_and_research = "Publications and Research"
+    publications_and_reports = "Publications and Reports"
 
     @ classmethod
     def clean(cls, value):
@@ -663,12 +663,12 @@ class MajorDocTypes(WBEnum):
 
         value = mappings.get(value, value)
 
-        # Unification of major document types to Publications and Research
-        other_types = {"Evaluation Document",
-                       "Country Focus", "Economic and Sector Work"}
+        # Unification of major document types to Publications and Reports
+        other_types = {"Evaluation Document", "Country Focus",
+                       "Economic and Sector Work", "Publications and Research"}
 
         if value in other_types:
-            value = "Publications and Research"
+            value = "Publications and Reports"
 
         return value
 
