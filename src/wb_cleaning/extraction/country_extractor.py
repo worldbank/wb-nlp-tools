@@ -73,7 +73,7 @@ def get_country_counts(txt):
         replaced = replace_countries(txt)
     except IndexError:
         return None
-    counts = Counter([i.split('$')[-1].strip()
+    counts = Counter([i.split(DELIMITER)[-1].strip()
                      for i in replaced.split() if i.startswith(anchor_code)])
     counts = dict(counts.most_common())
 
@@ -146,12 +146,12 @@ country_group_processor.add_keywords_from_dict(
     {k: get_normalized_country_group_name(k) for k in country_groups_map})
 
 country_map = {}
-sep = "$"
+DELIMITER = "$"
 anchor_code = f"country-code"
 for cname, normed in mapping.items():
     # Make sure to add a trailing space at the end of the code below.
     # This guarantees that we isolate the token from symbols, e.g., comma, period, etc.
-    code = f"{anchor_code}{sep}{normed['code']} "
+    code = f"{anchor_code}{DELIMITER}{normed['code']} "
     if code in country_map:
         country_map[code].append(cname)
     else:
