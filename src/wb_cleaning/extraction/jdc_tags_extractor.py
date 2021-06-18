@@ -21,8 +21,8 @@ inflect_engine = inflect.engine()
 # Occurences of these prototypes will be mapped to the tag keyword.
 
 
-# ["fr", "es"]):
-def get_keywords_mapping(tags_sheet, src="en", translate_to=["fr", "es"]):
+def get_keywords_mapping(tags_sheet, src="en", translate_to=None):
+    # translate_to = ["fr", "es"]
     if translate_to is None:
         translate_to = []
 
