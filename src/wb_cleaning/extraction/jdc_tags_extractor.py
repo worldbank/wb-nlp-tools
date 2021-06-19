@@ -6,7 +6,13 @@ import inflect
 from wb_cleaning.dir_manager import get_data_dir
 from wb_cleaning.translate import translation
 
+ACCENTED_CHARS = set(
+    "ÂÃÄÀÁÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ")
+
 jdc_tags_processor = KeywordProcessor()
+jdc_tags_processor.set_non_word_boundaries(
+    jdc_tags_processor.non_word_boundaries | ACCENTED_CHARS)
+
 inflect_engine = inflect.engine()
 
 # input schema
@@ -47,7 +53,7 @@ def get_keywords_mapping(tags_sheet, src="en", translate_to=None):
             #     lambda x: x + [translation.translate_shell(i, src=src, dest=dest).get("translated") for i in x if "_" not in i])
 
             lang_map[dest] = tags_mapping.map(
-                lambda x: translation.translate_list([i for i in x if "_" not in i], src=src, dest=dest, remove_accents=True)).map(
+                lambda x: translation.translate_list([i for i in x if "_" not in i], src=src, dest=dest, remove_accents=False)).map(
                     lambda x: x +
                 [inflect_engine.plural(i) for i in x if "_" not in i]
             )

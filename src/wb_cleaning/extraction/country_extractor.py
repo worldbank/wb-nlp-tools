@@ -7,8 +7,18 @@ from flashtext import KeywordProcessor
 
 from wb_cleaning.extraction.whitelist import mappings
 from wb_cleaning.dir_manager import get_data_dir
+
+
+ACCENTED_CHARS = set(
+    "ÂÃÄÀÁÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ")
+
 country_code_processor = KeywordProcessor()
+country_code_processor.set_non_word_boundaries(
+    country_code_processor.non_word_boundaries | ACCENTED_CHARS)
+
 country_group_processor = KeywordProcessor()
+country_group_processor.set_non_word_boundaries(
+    country_group_processor.non_word_boundaries | ACCENTED_CHARS)
 
 
 def get_standardized_regions(iso_code="iso3c"):

@@ -11,7 +11,13 @@ from wb_cleaning import dir_manager
 # export DASK_DISTRIBUTED__COMM__TIMEOUTS__CONNECT=60
 # export DASK_DISTRIBUTED__COMM__RETRY__COUNT=20
 
+
+ACCENTED_CHARS = set(
+    "ÂÃÄÀÁÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ")
+
 keyword_processor = KeywordProcessor()
+keyword_processor.set_non_word_boundaries(
+    keyword_processor.non_word_boundaries | ACCENTED_CHARS)
 
 with open(dir_manager.get_data_dir('whitelists', 'whitelists', 'phrases.txt')) as phrase_file:
     # Use flashtext format
