@@ -130,16 +130,22 @@ def get_country_counts_regions(counts):
     return sorted({standardized_regions_iso3c.get(c) for c in counts if standardized_regions_iso3c.get(c)})
 
 
+def load_iso3166_3_country_info():
+    return pd.read_json(get_data_dir("maps", "iso3166-3-country-info.json")).to_dict()
+
+
+def load_country_groups_map():
+    return pd.read_excel(
+        get_data_dir("whitelists", "countries", "codelist.xlsx"),
+        sheet_name="groups_iso3c", header=1, index_col=1).drop("country.name.en", axis=1).apply(lambda col_ser: col_ser.dropna().index.dropna().tolist(), axis=0).to_dict()
+
+
 standardized_regions_full = get_standardized_regions(iso_code="full")
 standardized_regions_iso3c = get_standardized_regions(iso_code="iso3c")
 valid_regions = sorted(standardized_regions_full["region"].unique())
 
-iso3166_3_country_info = pd.read_json(
-    get_data_dir("maps", "iso3166-3-country-info.json"))
-
-country_groups_map = pd.read_excel(
-    get_data_dir("whitelists", "countries", "codelist.xlsx"),
-    sheet_name="groups_iso3c", header=1, index_col=1).drop("country.name.en", axis=1).apply(lambda col_ser: col_ser.dropna().index.dropna().tolist(), axis=0).to_dict()
+iso3166_3_country_info = load_iso3166_3_country_info()
+country_groups_map = load_country_groups_map()
 
 mapping = mappings.get_countries_mapping()
 
