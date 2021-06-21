@@ -40,3 +40,29 @@ class TestCountryExtractor:
 
         error_string = "\n".join(errors)
         assert not error_string, f"errors in: \n{error_string}"
+
+    def test_get_country_code_from_name(self):
+        name = "Philippines"
+        expected = "PHL"
+
+        returns = ce.get_country_code_from_name(name)
+
+        assert expected == returns
+
+    def test_replace_country_group_names(self):
+        txt = "countries in asean"
+        expected = "countries in ASEAN"
+
+        returns = ce.replace_country_group_names(txt)
+
+        assert expected == returns
+
+    def test_replace_countries(self):
+        txt = "countries in philippines"
+
+        # Note the trailing space after PHL
+        expected = f"countries in {ce.anchor_code}{ce.DELIMITER}PHL "
+
+        returns = ce.replace_countries(txt)
+
+        assert expected == returns
