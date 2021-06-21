@@ -2,7 +2,7 @@
 # pylint: disable=no-self-argument
 import re
 import enum
-from typing import Optional, List
+from typing import List
 from datetime import date, datetime
 from pydantic import BaseModel, Field, validator, AnyUrl
 from hashlib import md5
@@ -16,6 +16,7 @@ from wb_cleaning.types.metadata_enums import (
     WBMajorDocTypes,
     WBTopics,
     MajorDocTypes,
+    RegionTypes,
     # WBSubTopics,  # Don't normalize subtopics since we don't have a reliable curated list yet.
 )
 
@@ -241,6 +242,12 @@ class MetadataModel(BaseModel):
         None, description="Frequency of extracted acronyms from the document.")
     der_countries: dict = Field(
         None, description="Frequency of extracted countries from the document.")
+    der_country: List[str] = Field(
+        None, description="List of unique country names extracted from the document."
+    )
+    der_country_counts: dict = Field(
+        None, description="Frequency of extracted countries from the document."
+    )
     der_country_details: list = Field(
         None, description="Detailed information on extracted countries from the document."
     )
@@ -259,6 +266,8 @@ class MetadataModel(BaseModel):
         None, description="")
     der_raw_token_count: int = Field(
         None, description="")
+    der_regions: List[RegionTypes] = Field(
+        None, description="List of unique regions corresponding to countries found in the document.")
     der_clean_token_count: int = Field(
         None, description="")
     digital_identifier: str = Field(

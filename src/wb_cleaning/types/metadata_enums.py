@@ -673,6 +673,41 @@ class MajorDocTypes(WBEnum):
         return value
 
 
+class RegionTypes(WBEnum):
+    '''
+    Curated list of regions.
+    The list is based on the data/whitelists/countries/codelist.xlsx file.
+    '''
+    EMPTY = ""
+
+    east_asia_and_pacific = 'East Asia & Pacific'
+    europe_and_central_asia = 'Europe & Central Asia'
+    latin_america_and_caribbean = 'Latin America & Caribbean'
+    middle_east_and_north_africa = 'Middle East & North Africa'
+    north_america = 'North America'
+    south_asia = 'South Asia'
+    sub_saharan_africa = 'Sub-Saharan Africa'
+
+    @ classmethod
+    def clean(cls, value):
+        value = value.strip().lower()
+
+        mappings = {
+            "east asia and pacific": "East Asia & Pacific",
+            "europe and central asia": "Europe & Central Asia",
+            "latin america and caribbean": "Latin America & Caribbean",
+            "middle east and north africa": "Middle East & North Africa",
+            "sub saharan africa": "Sub-Saharan Africa",
+            "subsaharan africa": "Sub-Saharan Africa",
+            None: "",
+        }
+
+        value = mappings.get(value, value)
+        value = value.title()
+
+        return value
+
+
 class WBTopics(enum.Enum):
     '''Curated list of topics.
 
