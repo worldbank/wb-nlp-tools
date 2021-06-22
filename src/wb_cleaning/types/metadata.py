@@ -189,6 +189,7 @@ class CategoricalFields(enum.Enum):
     doc_type = "doc_type"
     geo_region = "geo_region"
     major_doc_type = "major_doc_type"
+    der_regions = "der_regions"
     topics_src = "topics_src"
 
 
