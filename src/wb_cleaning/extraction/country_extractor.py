@@ -127,7 +127,12 @@ def get_detailed_country_counts(txt):
 
 
 def get_country_counts_regions(counts):
-    return sorted({standardized_regions_iso3c.get(c) for c in counts if standardized_regions_iso3c.get(c)})
+    regions = None
+    if counts:
+        regions = sorted({standardized_regions_iso3c.get(c)
+                         for c in counts if standardized_regions_iso3c.get(c)})
+
+    return regions
 
 
 def load_iso3166_3_country_info():
