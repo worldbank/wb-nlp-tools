@@ -76,3 +76,24 @@ class TestCountryExtractor:
 
     def test_get_country_counts_regions_None(self):
         assert ce.get_country_counts_regions(None) is None
+
+    def test_get_region_countries_None(self):
+        assert ce.get_region_countries(None) is None
+
+    def test_get_region_countries(self):
+        region = ["South Asia"]
+        expected = ['Afghanistan', 'Bangladesh', 'Bhutan',
+                    'India', 'Maldives', 'Nepal', 'Pakistan', 'Sri Lanka']
+
+        returns = ce.get_region_countries(region)
+
+        assert expected == returns
+
+    def test_get_region_countries_not_sorted(self):
+        region = ["South Asia"]
+        expected = ['Maldives', 'Bangladesh', 'Sri Lanka', 'Afghanistan', 'Bhutan',
+                    'India', 'Nepal', 'Pakistan', ]
+
+        returns = ce.get_region_countries(region)
+
+        assert sorted(expected) == returns

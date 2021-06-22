@@ -135,6 +135,15 @@ def get_country_counts_regions(counts):
     return regions
 
 
+def get_region_countries(regions):
+    countries = None
+    if regions:
+        countries = sorted(standardized_regions_full[standardized_regions_full["region"].isin(
+            regions)]["iso3c"].map(get_country_name_from_code).tolist())
+
+    return countries
+
+
 def load_iso3166_3_country_info():
     return pd.read_json(get_data_dir("maps", "iso3166-3-country-info.json")).to_dict()
 
