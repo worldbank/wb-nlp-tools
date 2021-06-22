@@ -269,6 +269,12 @@ class MetadataModel(BaseModel):
         None, description="")
     der_regions: List[RegionTypes] = Field(
         None, description="List of unique regions corresponding to countries found in the document.")
+    der_top_country: str = Field(
+        None, description="Country with the highest frequency of mentions in the document."
+    )
+    der_top_region: str = Field(
+        None, description="Region of the `der_top_country`."
+    )
     der_clean_token_count: int = Field(
         None, description="")
     digital_identifier: str = Field(

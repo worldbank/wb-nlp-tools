@@ -154,6 +154,10 @@ def load_country_groups_map():
         sheet_name="groups_iso3c", header=1, index_col=1).drop("country.name.en", axis=1).apply(lambda col_ser: col_ser.dropna().index.dropna().tolist(), axis=0).to_dict()
 
 
+def get_region_from_country_code(code):
+    return standardized_regions_iso3c.get(code)
+
+
 standardized_regions_full = get_standardized_regions(iso_code="full")
 standardized_regions_iso3c = get_standardized_regions(iso_code="iso3c")
 valid_regions = sorted(standardized_regions_full["region"].unique())
