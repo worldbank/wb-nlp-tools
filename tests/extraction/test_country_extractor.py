@@ -66,3 +66,13 @@ class TestCountryExtractor:
         returns = ce.replace_countries(txt)
 
         assert expected == returns
+
+    def test_get_country_counts_regions(self):
+        counts = dict(PHL=20)
+        expected = ["East Asia & Pacific"]
+        returns = ce.get_country_counts_regions(counts)
+
+        assert expected == returns
+
+    def test_get_country_counts_regions_None(self):
+        assert ce.get_country_counts_regions(None) is None
