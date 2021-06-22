@@ -20,6 +20,191 @@ from wb_cleaning.types.metadata_enums import (
     # WBSubTopics,  # Don't normalize subtopics since we don't have a reliable curated list yet.
 )
 
+
+class SortOrder(enum.Enum):
+    asc = "ascending"
+    desc = "descending"
+
+
+class SortOn(BaseModel):
+    field: str
+    order: SortOrder = SortOrder.desc
+
+
+class CategoricalFields(enum.Enum):
+    adm_region = "adm_region"
+    corpus = "corpus"
+    country = "country"
+    doc_type = "doc_type"
+    geo_region = "geo_region"
+    major_doc_type = "major_doc_type"
+    der_regions = "der_regions"
+    topics_src = "topics_src"
+
+
+class CountryCounts(BaseModel):
+    country_code: str
+    count: int
+
+
+class MetadataModel(BaseModel):
+    """
+    Summary of required fields:
+        - hex_id
+        - int_id
+        - corpus
+        - filename_original
+        - last_update_date
+        - path_original
+        - title
+    """
+    id: str = Field(
+        ..., description="Unique identifier for the document. Derived identifiers such as `hex_id` will be based on this.")
+    hex_id: str = Field(
+        ..., description="This id will be the basis for the `int_id` that will be used in the Milvus index.")
+    int_id: int = Field(
+        ..., description="This will be the id derived from the `hex_id` that will be used in the Milvus index.")
+
+    abstract: str = Field(
+        None,
+        description="Abstract of the document."
+    )
+    adm_region: List[str] = Field(
+        None, description="List of administrative regions. Example: Africa.")
+    app_tag_jdc: bool = Field(
+        False, description="Tag associated with documents that belong to the JDC collection.")
+    author: List[str] = Field(
+        None, description="List of author names.")
+
+    cleaning_config_id: str = Field(
+        None,
+        description="This corresponds to the configuration ID of the cleaning pipeline that was used to generate the cleaned file in the `path_clean` field.")
+    collection: str = Field(
+        None, description="")
+    corpus: Corpus = Field(
+        ..., description="The corpus id of the document source.")
+    country: List[str] = Field(
+        None, description="List of countries from the source repository, if available.")
+
+    date_published: date = Field(
+        None, description="Publication date of the document.")
+    der_acronyms: List[str] = Field(
+        None, description="Frequency of extracted acronyms from the document.")
+    der_countries: dict = Field(
+        None, description="Frequency of extracted countries from the document.")
+    der_country: List[str] = Field(
+        None, description="List of unique country names extracted from the document."
+    )
+    der_country_counts: dict = Field(
+        None, description="Frequency of extracted countries from the document."
+    )
+    der_country_details: list = Field(
+        None, description="Detailed information on extracted countries from the document."
+    )
+    der_country_groups: List[str] = Field(
+        None, description="List of country groups that the country associated with the document belong to."
+    )
+    der_jdc_data: List[dict] = Field(
+        None, description="List of objects corresponding to tags related to JDC and their respective frequency of occurence in the document."
+    )
+    der_jdc_tags: List[str] = Field(
+        None, description="List of tags found in `der_jdc_data`."
+    )
+    der_language_detected: str = Field(
+        None, description="Language detected in the document.")
+    der_language_score: float = Field(
+        None, description="Confidence score of the detected language.")
+    der_raw_token_count: int = Field(
+        None, description="Count of raw tokens.")
+    der_regions: List[RegionTypes] = Field(
+        None, description="List of unique regions corresponding to countries found in the document.")
+    der_top_country: str = Field(
+        None, description="Country with the highest frequency of mentions in the document."
+    )
+    der_top_region: str = Field(
+        None, description="Region of the `der_top_country`."
+    )
+    der_clean_token_count: int = Field(
+        None, description="Count of cleaned tokens.")
+    digital_identifier: str = Field(
+        None,
+        description="Document digital identifier. For WB documents, use the information from API; for other corpus, use ISBN, or DOI, or other ID if available.")
+    doc_type: List[str] = Field(
+        None, description="Document type as defined from the source repository.")
+
+    filename_original: str = Field(
+        ..., description="Filename of the document without path.")
+
+    geo_region: List[str] = Field(
+        None, description="List of geographic regions covered in the document.")
+
+    journal: str = Field(
+        None, description="Journal where the document is published.")
+
+    keywords: List[str] = Field(
+        None, description="Keywords extracted from source API or page."
+    )
+
+    # language_detected -> der_language_detected
+    # language_score -> der_language_score
+
+    language_src: str = Field(
+        None, description="Language of the document specified in the source repository.")
+    last_update_date: datetime = Field(
+        datetime.now(), description="Date when the metadata was last updated.")
+
+    major_doc_type: List[MajorDocTypes] = Field(
+        None, description="Curated major document type.")
+
+    path_clean: str = Field(
+        None, description="Path to the cleaned text.")
+
+    path_original: str = Field(
+        ..., description="Path to the raw text.")
+    path_pdf_file: str = Field(
+        None, description="Path of the scraped PDF file."
+    )
+    project_id: List[str] = Field(
+        None, description="Project id(s) associated with the document."
+    )
+
+    title: str = Field(
+        ..., description="")
+    # tokens -> der_clean_token_count
+    topics_src: List[str] = Field(
+        None, description="Raw topics extracted from source.")
+
+    url_pdf: AnyUrl = Field(
+        None, description="URL to the PDF source.")
+    url_txt: AnyUrl = Field(
+        None, description="URL to the TXT source.")
+
+    volume: str = Field(
+        None, description="Volume of the journal.")
+
+    wb_lending_instrument: List[str] = Field(
+        None, description="World Bank metadata: lending instrument")
+    wb_major_theme: List[str] = Field(
+        None, description="World Bank metadata: major theme")
+    wb_product_line: str = Field(
+        None, description="World Bank metadata: product line")
+    wb_project_id: List[str] = Field(
+        None, description="World Bank metadata: project id")
+    wb_sector: List[str] = Field(
+        None, description="World Bank metadata: sector")
+    wb_subtopic_src: List[str] = Field(
+        None, description="World Bank metadata: subtopic")
+    wb_theme: List[str] = Field(
+        None, description="World Bank metadata: theme")
+
+    year: int = Field(
+        None, description="Year the document is published")
+
+
+class DocumentModel(BaseModel):
+    text: str
+
+
 # Until comma or end of line
 REPUBLIC_OF_PATTERN = re.compile(r"(\S+), (Republic of)(,|$)")
 
@@ -171,186 +356,3 @@ def make_metadata_model_from_nlp_schema(body):
 
 #                 if field_name != "doc_type":
 #                     raise(exc)
-
-class SortOrder(enum.Enum):
-    asc = "ascending"
-    desc = "descending"
-
-
-class SortOn(BaseModel):
-    field: str
-    order: SortOrder = SortOrder.desc
-
-
-class CategoricalFields(enum.Enum):
-    adm_region = "adm_region"
-    corpus = "corpus"
-    country = "country"
-    doc_type = "doc_type"
-    geo_region = "geo_region"
-    major_doc_type = "major_doc_type"
-    der_regions = "der_regions"
-    topics_src = "topics_src"
-
-
-class CountryCounts(BaseModel):
-    country_code: str
-    count: int
-
-
-class MetadataModel(BaseModel):
-    """
-    Summary of required fields:
-        - hex_id
-        - int_id
-        - corpus
-        - filename_original
-        - last_update_date
-        - path_original
-        - title
-    """
-    id: str = Field(
-        ..., description="Unique identifier for the document. Derived identifiers such as `hex_id` will be based on this.")
-    hex_id: str = Field(
-        ..., description="This id will be the basis for the `int_id` that will be used in the Milvus index.")
-    int_id: int = Field(
-        ..., description="This will be the id derived from the `hex_id` that will be used in the Milvus index.")
-
-    abstract: str = Field(
-        None,
-        description="Abstract of the document."
-    )
-    adm_region: List[str] = Field(
-        None, description="List of administrative regions. Example: Africa.")
-    app_tag_jdc: bool = Field(
-        False, description="Tag associated with documents that belong to the JDC collection.")
-    author: List[str] = Field(
-        None, description="")
-
-    cleaning_config_id: str = Field(
-        None,
-        description="This corresponds to the configuration ID of the cleaning pipeline that was used to generate the cleaned file in the `path_clean` field.")
-    collection: str = Field(
-        None, description="")
-    corpus: Corpus = Field(
-        ..., description="")
-    country: List[str] = Field(
-        None, description="")
-
-    date_published: date = Field(
-        None, description="")
-    der_acronyms: List[str] = Field(
-        None, description="Frequency of extracted acronyms from the document.")
-    der_countries: dict = Field(
-        None, description="Frequency of extracted countries from the document.")
-    der_country: List[str] = Field(
-        None, description="List of unique country names extracted from the document."
-    )
-    der_country_counts: dict = Field(
-        None, description="Frequency of extracted countries from the document."
-    )
-    der_country_details: list = Field(
-        None, description="Detailed information on extracted countries from the document."
-    )
-    der_country_groups: List[str] = Field(
-        None, description="List of country groups that the country associated with the document belong to."
-    )
-    der_jdc_data: List[dict] = Field(
-        None, description="List of objects corresponding to tags related to JDC and their respective frequency of occurence in the document."
-    )
-    der_jdc_tags: List[str] = Field(
-        None, description="List of tags found in `der_jdc_data`."
-    )
-    der_language_detected: str = Field(
-        None, description="")
-    der_language_score: float = Field(
-        None, description="")
-    der_raw_token_count: int = Field(
-        None, description="")
-    der_regions: List[RegionTypes] = Field(
-        None, description="List of unique regions corresponding to countries found in the document.")
-    der_top_country: str = Field(
-        None, description="Country with the highest frequency of mentions in the document."
-    )
-    der_top_region: str = Field(
-        None, description="Region of the `der_top_country`."
-    )
-    der_clean_token_count: int = Field(
-        None, description="")
-    digital_identifier: str = Field(
-        None,
-        description="Document digital identifier. For WB documents, use the information from API; for other corpus, use ISBN, or DOI, or other ID if available.")
-    doc_type: List[str] = Field(
-        None, description="")
-
-    filename_original: str = Field(
-        ..., description="Filename of the document without path.")
-
-    geo_region: List[str] = Field(
-        None, description="List of geographic regions covered in the document.")
-
-    journal: str = Field(
-        None, description="")
-
-    keywords: List[str] = Field(
-        None, description="Keywords extracted from source API or page."
-    )
-
-    # language_detected -> der_language_detected
-    # language_score -> der_language_score
-
-    language_src: str = Field(
-        None, description="")
-    last_update_date: datetime = Field(
-        datetime.now(), description="")
-
-    major_doc_type: List[MajorDocTypes] = Field(
-        None, description="")
-
-    path_clean: str = Field(
-        None, description="")
-
-    path_original: str = Field(
-        ..., description="")
-    path_pdf_file: str = Field(
-        None, description="Path of the scraped PDF file."
-    )
-    project_id: List[str] = Field(
-        None, description="Project id(s) associated with the document."
-    )
-
-    title: str = Field(
-        ..., description="")
-    # tokens -> der_clean_token_count
-    topics_src: List[str] = Field(
-        None, description="Raw topics extracted from source.")
-
-    url_pdf: AnyUrl = Field(
-        None, description="")
-    url_txt: AnyUrl = Field(
-        None, description="")
-
-    volume: str = Field(
-        None, description="")
-
-    wb_lending_instrument: List[str] = Field(
-        None, description="")
-    wb_major_theme: List[str] = Field(
-        None, description="")
-    wb_product_line: str = Field(
-        None, description="")
-    wb_project_id: List[str] = Field(
-        None, description="")
-    wb_sector: List[str] = Field(
-        None, description="")
-    wb_subtopic_src: List[str] = Field(
-        None, description="")
-    wb_theme: List[str] = Field(
-        None, description="")
-
-    year: int = Field(
-        None, description="")
-
-
-class DocumentModel(BaseModel):
-    text: str
