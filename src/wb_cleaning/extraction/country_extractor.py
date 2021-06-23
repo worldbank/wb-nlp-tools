@@ -77,6 +77,12 @@ def replace_countries(txt):
     return country_code_processor.replace_keywords(txt)
 
 
+def load_country_groups_names():
+    return pd.read_excel(
+        get_data_dir("whitelists", "countries", "codelist.xlsx"),
+        sheet_name="groups_names", header=0, index_col=0).to_dict()["Full name"]
+
+
 def get_country_counts(txt):
     txt = re.sub(r"\s+", " ", txt)
     try:
@@ -164,7 +170,7 @@ valid_regions = sorted(standardized_regions_full["region"].unique())
 
 iso3166_3_country_info = load_iso3166_3_country_info()
 country_groups_map = load_country_groups_map()
-
+country_groups_names = load_country_groups_names()
 mapping = mappings.get_countries_mapping()
 
 
