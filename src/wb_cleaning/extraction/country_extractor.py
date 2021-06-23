@@ -7,7 +7,7 @@ from flashtext import KeywordProcessor
 
 from wb_cleaning.extraction.whitelist import mappings
 from wb_cleaning.dir_manager import get_data_dir
-
+from wb_cleaning.types.metadata_enums import RegionTypes
 
 ACCENTED_CHARS = set(
     "ÂÃÄÀÁÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ")
@@ -165,9 +165,12 @@ def get_region_from_country_code(code):
 
 
 standardized_regions_full = get_standardized_regions(iso_code="full")
+
+# {iso3-code1: region1, iso3-code2: region2, ... }
 standardized_regions_iso3c = get_standardized_regions(iso_code="iso3c")
 valid_regions = sorted(standardized_regions_full["region"].unique())
 
+# {iso3-code1: {name: country_name1, region: region1, ...}, ... }
 iso3166_3_country_info = load_iso3166_3_country_info()
 country_groups_map = load_country_groups_map()
 country_groups_names = load_country_groups_names()
@@ -198,3 +201,19 @@ for cname, normed in mapping.items():
         country_map[code] = [cname]
 
 country_code_processor.add_keywords_from_dict(country_map)
+
+
+REGION_COLORS = {
+    # https://lospec.com/palette-list/dawnbringers-8-color
+    RegionTypes.east_asia_and_pacific: "#55415f",
+    RegionTypes.europe_and_central_asia: "#646964",
+    RegionTypes.latin_america_and_caribbean: "#d77355",
+    RegionTypes.middle_east_and_north_africa: "#508cd7",
+    RegionTypes.north_america: "#64b964",
+    RegionTypes.south_asia: "#e6c86e",
+    RegionTypes.sub_saharan_africa: "#dcf5ff",
+}
+
+
+COUNTRY_REGION_COLORS = {code: REGION_COLORS.get(
+    RegionTypes(standardized_regions_iso3c.get(code))) for code in standardized_regions_iso3c}
