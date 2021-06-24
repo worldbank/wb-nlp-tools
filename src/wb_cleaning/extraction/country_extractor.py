@@ -200,6 +200,9 @@ for cname, normed in mapping.items():
     else:
         country_map[code] = [cname]
 
+# NOTE: Add this since some OCR parsing resulted to l instead of I.
+country_map[f"{anchor_code}{DELIMITER}CIV "].append("Cote d'lvoire")
+
 country_code_processor.add_keywords_from_dict(country_map)
 
 
