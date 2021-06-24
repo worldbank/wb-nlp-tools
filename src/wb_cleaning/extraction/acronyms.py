@@ -17,7 +17,8 @@ acronyms_pattern = re.compile(r'(\([A-Z]{2,}\))')
 candidates_pattern = re.compile(r'([A-Z][a-z]+|\([A-Z]{2,}\))')
 newline_pattern = re.compile(b'[\r\n]+')
 whitespaces_pattern = re.compile(r'\s+')
-alphabet_pattern = re.compile('[A-Z-a-z]+')
+alphabet_pattern = re.compile('[a-zA-ZÀ-ÖØ-öø-ÿа-ҳА-Ҳ]+')
+
 stops = set(['the', 'of', 'in', 'and', 'or', 'for'])
 stops.update(nltk_stops)
 
@@ -28,9 +29,11 @@ def extract_acronyms(txt):
     """
     acronyms = [i.strip('(').strip(')') for i in acronyms_pattern.findall(txt)]
     keyword = '|'.join([rf'\({k}\)' for k in acronyms])
-    candidates_acronym_pattern = "((?:[a-zA-Z'-]+ ){0,5})(" + keyword + ")" #((?:[^a-zA-Z'-]+[a-zA-Z'-]+){0,5})"
+    # ((?:[^a-zA-Z'-]+[a-zA-Z'-]+){0,5})"
+    candidates_acronym_pattern = "((?:[a-zA-ZÀ-ÖØ-öø-ÿа-ҳА-Ҳ'-]+ ){0,5})(" + keyword + ")"
     candidates_acronym_pattern = re.compile(candidates_acronym_pattern)
-    acronym_candidates_lists = candidates_acronym_pattern.findall(whitespaces_pattern.sub(' ', txt))
+    acronym_candidates_lists = candidates_acronym_pattern.findall(
+        whitespaces_pattern.sub(' ', txt))
     detected_acronyms = {}
 
     for ip in acronym_candidates_lists:
@@ -56,6 +59,14 @@ def extract_acronyms(txt):
                 break
 
     return detected_acronyms
+
+
+def extract_acronyms_array(txt):
+    acronyms = [dict(acronym=code, name=name)
+                for code, name in extract_acronyms(txt).items()]
+    if not acronyms:
+        acronyms = None
+    return acronyms
 
 
 def detect_acronyms(txt):
@@ -129,14 +140,15 @@ def merge_corpora_acronyms_map(acronyms_maps):
 
                     merged_corpora_acronyms_map[a]['doc_freq'] += doc_freq
                 else:
-                    merged_corpora_acronyms_map[a] = {'prototypes': prototypes, 'doc_freq': doc_freq}
+                    merged_corpora_acronyms_map[a] = {
+                        'prototypes': prototypes, 'doc_freq': doc_freq}
 
     return merged_corpora_acronyms_map
 
 
 def get_corpus_top_acronym_prototypes(corpus_full_acronyms_map, prototypes=5):
     acronyms_popular_prototype = []
-    columns=['acronym', 'doc_freq', 'full_name', 'percentage']
+    columns = ['acronym', 'doc_freq', 'full_name', 'percentage']
 
     # for i in range(1, prototypes + 1):
     #     columns.append(f'popular_prototype_{i}')
@@ -144,7 +156,8 @@ def get_corpus_top_acronym_prototypes(corpus_full_acronyms_map, prototypes=5):
 
     for a, d in corpus_full_acronyms_map.items():
         x = pd.Series(corpus_full_acronyms_map[a]['prototypes'])
-        y = (x / corpus_full_acronyms_map[a]['doc_freq']).sort_values(ascending=False)
+        y = (x / corpus_full_acronyms_map[a]
+             ['doc_freq']).sort_values(ascending=False)
         doc_freq = corpus_full_acronyms_map[a]['doc_freq']
 
         for ind in range(prototypes):
@@ -164,7 +177,8 @@ def get_corpus_top_acronym_prototypes(corpus_full_acronyms_map, prototypes=5):
         columns=columns
     )
 
-    acronyms_popular_prototype = acronyms_popular_prototype.sort_values('doc_freq', ascending=False).reset_index(drop='index')
+    acronyms_popular_prototype = acronyms_popular_prototype.sort_values(
+        'doc_freq', ascending=False).reset_index(drop='index')
 
     return acronyms_popular_prototype
 
@@ -172,7 +186,8 @@ def get_corpus_top_acronym_prototypes(corpus_full_acronyms_map, prototypes=5):
 class AcronymMapper:
     def __init__(self, whitelist_file, sim_thresh=0.8):
         whitelist_acronyms = pd.read_csv(whitelist_file, header=None)
-        self.whitelist_acronyms = whitelist_acronyms.rename(columns={0: 'acronym', 1: 'actual'})
+        self.whitelist_acronyms = whitelist_acronyms.rename(
+            columns={0: 'acronym', 1: 'actual'})
 
         self.hvec = HashingVectorizer()
 
@@ -197,9 +212,11 @@ class AcronymMapper:
                 valid_candidate_acronyms = doc_detected_acronyms[i]
                 assert(len(valid_candidate_acronyms) == 1)
 
-                valid_candidate_acronyms_vec = self.hvec.transform(valid_candidate_acronyms)
+                valid_candidate_acronyms_vec = self.hvec.transform(
+                    valid_candidate_acronyms)
 
-                sims = cosine_similarity(self.actual_vectors, valid_candidate_acronyms_vec)
+                sims = cosine_similarity(
+                    self.actual_vectors, valid_candidate_acronyms_vec)
                 max_index = sims.argmax()
                 max_sim = sims[max_index]
 
@@ -215,14 +232,16 @@ class AcronymMapper:
         return valid_doc_acronyms, invalid_in_doc_to_actual
 
     def expand_doc_acronyms(self, txt):
-        valid_doc_acronyms, invalid_in_doc_to_actual = self.get_valid_doc_acronym(txt)
+        valid_doc_acronyms, invalid_in_doc_to_actual = self.get_valid_doc_acronym(
+            txt)
 
         for acr in valid_doc_acronyms:
             txt = txt.replace(f' ({acr})', ' ')
             txt = txt.replace(f' {acr} ', f' {valid_doc_acronyms[acr]} ')
 
         for invalid_full in invalid_in_doc_to_actual:
-            txt = txt.replace(invalid_full, invalid_in_doc_to_actual[invalid_full])
+            txt = txt.replace(
+                invalid_full, invalid_in_doc_to_actual[invalid_full])
 
         return txt
 

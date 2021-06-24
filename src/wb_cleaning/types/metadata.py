@@ -88,8 +88,8 @@ class MetadataModel(BaseModel):
 
     date_published: date = Field(
         None, description="Publication date of the document.")
-    der_acronyms: List[str] = Field(
-        None, description="Frequency of extracted acronyms from the document.")
+    der_acronyms: List[dict] = Field(
+        None, description="Extracted acronyms from the document.")
     der_countries: dict = Field(
         None, description="Frequency of extracted countries from the document.")
     der_country: List[str] = Field(
