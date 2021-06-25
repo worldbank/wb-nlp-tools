@@ -220,3 +220,14 @@ REGION_COLORS = {
 
 COUNTRY_REGION_COLORS = {code: REGION_COLORS.get(
     RegionTypes(standardized_regions_iso3c.get(code))) for code in standardized_regions_iso3c}
+
+
+# {
+#     "CHI": "Channel Islands",
+#     "CSK": "Czechoslovakia",
+#     "PIC": "Pacific Islands",
+#     "SUN": "Soviet Union",
+#     "WBG": "West Bank and Gaza",
+#     "XKX": "Kosovo",
+#     "YUG": "Yougoslavia",
+# }
