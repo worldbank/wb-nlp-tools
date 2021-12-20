@@ -1,0 +1,4 @@
+fasttext
+polyglot
+PyICU
+git+https://github.com/avsolatorio/pycld2.git@d63195032c3a2c126cc4cbe1cb1c6de8cf8c8d2a
