@@ -182,6 +182,8 @@ class MetadataModel(BaseModel):
     volume: str = Field(
         None, description="Volume of the journal.")
 
+    wb_id: str = Field(
+        None, description="World Bank metadata: id")
     wb_lending_instrument: List[str] = Field(
         None, description="World Bank metadata: lending instrument")
     wb_major_theme: List[str] = Field(
@@ -308,6 +310,7 @@ def migrate_nlp_schema(body):
     body["url_txt"] = pop_get(body, "url_txt")
 
     body["volume"] = pop_get(body, "volume")
+    body["wb_id"] = pop_get(body, "wb_id")
     body["wb_lending_instrument"] = [pop_get(body, "wb_lending_instrument")]
     body["wb_major_theme"] = [pop_get(body, "wb_major_theme")]
     body["wb_product_line"] = pop_get(body, "wb_product_line")
