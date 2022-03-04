@@ -47,6 +47,29 @@ class CountryCounts(BaseModel):
     count: int
 
 
+class DocTypeEnum(enum.Enum):
+    """This is the enumeration of values for the
+    `type` field in the document_description."""
+
+    ARTICLE = "article"
+    BOOK = "book"
+    BOOKLET = "booklet"
+    COLLECTION = "collection"
+    CONFERENCE = "conference"
+    INBOOK = "inbook"
+    INCOLLECTION = "incollection"
+    INPROCEEDING = "inproceeding"
+    MANUAL = "manual"
+    MASTERTHESIS = "masterthesis"
+    PATENT = "patent"
+    PHDTHESIS = "phdthesis"
+    PROCEEDINGS = "proceedings"
+    TECHREPORT = "techreport"
+    WORKING_PAPER = "working-paper"
+    WEBSITE = "website"
+    OTHER = "other"
+
+
 class TitleStatementModel(BaseModel):
     """This model corresponds to the title_statement field
     in the document_description metadata.
@@ -60,10 +83,13 @@ class TitleStatementModel(BaseModel):
     abbreviated_title: str = Field(
         None, description="Title as abbreviated for indexing or identification.")
 
+
 class AuthorIDModel(BaseModel):
     """Model for the author_id field."""
     type: str = Field(None, description="Source of identifier, e.g. ORCID.")
-    id: str = Field(None, description="Author's unique identifier for the corresponding source")
+    id: str = Field(
+        None, description="Author's unique identifier for the corresponding source")
+
 
 class AuthorModel(BaseModel):
     """This model defines a single author entity."""
@@ -72,7 +98,21 @@ class AuthorModel(BaseModel):
     last_name: str = Field(None, description="Last name of the author.")
     full_name: str = Field(None, description="Full name of the author.")
     affiliation: str = Field(None, description="Affiliation of the author.")
-    author_id: List[AuthorIDModel] = Field(None, description="Unique identifier of an author, which may be provided by services like ORCID or other")
+    author_id: List[AuthorIDModel] = Field(
+        None, description="Unique identifier of an author, which may be provided by services like ORCID or other")
+
+
+class IDNumberModel(BaseModel):
+    """This model defines a single id_number entity.
+
+    Specific to the NLP Explorer application, we use this model to
+    represent `hex_id` and `int_id` data.
+
+    """
+
+    type: str = Field(...,
+                      description="ID number type such as ISSN, ISBN, DOI.")
+    value: str = Field(..., description="ID number.")
 
 
 class DocumentDescriptionModel(BaseModel):
@@ -87,10 +127,17 @@ class DocumentDescriptionModel(BaseModel):
         - title
     """
     title_statement: TitleStatementModel = Field(...)
-    authors: List[AuthorModel] = Field(None, description="List of author, if available.")
+    authors: List[AuthorModel] = Field(
+        None, description="List of author, if available.")
 
-    id: str = Field(
-        ..., description="Unique identifier for the document. Derived identifiers such as `hex_id` will be based on this.")
+    date_published: date = Field(
+        None, description="Date on which document was published.")
+
+    id_numbers: List[IDNumberModel] = Field(
+        None, description="Other identifiers.")
+
+    type: DocTypeEnum = Field(None, description="Document type.")
+
     hex_id: str = Field(
         ..., description="This id will be the basis for the `int_id` that will be used in the Milvus index.")
     int_id: int = Field(
