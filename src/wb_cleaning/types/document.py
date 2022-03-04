@@ -55,8 +55,24 @@ class TitleStatementModel(BaseModel):
     idno: str = Field(..., description="Unique identifier for the document. Derived identifiers such as `hex_id` will be based on this.")
     title: str = Field(..., description="Title of the document.")
     sub_title: str = Field(None, description="A short subtitle, if available.")
-    alternate_title: str = Field(None, description="Any form of the title used as a substitute or alternative to the formal title of the resource.")
-    abbreviated_title: str = Field(None, description="Title as abbreviated for indexing or identification.")
+    alternate_title: str = Field(
+        None, description="Any form of the title used as a substitute or alternative to the formal title of the resource.")
+    abbreviated_title: str = Field(
+        None, description="Title as abbreviated for indexing or identification.")
+
+class AuthorIDModel(BaseModel):
+    """Model for the author_id field."""
+    type: str = Field(None, description="Source of identifier, e.g. ORCID.")
+    id: str = Field(None, description="Author's unique identifier for the corresponding source")
+
+class AuthorModel(BaseModel):
+    """This model defines a single author entity."""
+    first_name: str = Field(None, description="First name of the author.")
+    initial: str = Field(None, description="Initials of the author.")
+    last_name: str = Field(None, description="Last name of the author.")
+    full_name: str = Field(None, description="Full name of the author.")
+    affiliation: str = Field(None, description="Affiliation of the author.")
+    author_id: List[AuthorIDModel] = Field(None, description="Unique identifier of an author, which may be provided by services like ORCID or other")
 
 
 class DocumentDescriptionModel(BaseModel):
@@ -70,6 +86,9 @@ class DocumentDescriptionModel(BaseModel):
         - path_original
         - title
     """
+    title_statement: TitleStatementModel = Field(...)
+    authors: List[AuthorModel] = Field(None, description="List of author, if available.")
+
     id: str = Field(
         ..., description="Unique identifier for the document. Derived identifiers such as `hex_id` will be based on this.")
     hex_id: str = Field(
