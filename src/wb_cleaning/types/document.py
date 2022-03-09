@@ -115,6 +115,13 @@ class IDNumberModel(BaseModel):
     value: str = Field(..., description="ID number.")
 
 
+class RefCountry(BaseModel):
+    """This represents an item for the ref_country field."""
+
+    name: str = Field(..., description="Country name")
+    code: str = Field(..., description="Country code")
+
+
 class DocumentDescriptionModel(BaseModel):
     """
     Summary of required fields:
