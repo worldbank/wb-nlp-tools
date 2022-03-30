@@ -65,7 +65,7 @@ def create_get_directory(parent: Path, child: str) -> Path:
     return path
 
 
-def create_dask_cluster(logger=None, n_workers=None):
+def create_dask_cluster(logger=None, n_workers=None, return_cluster=False):
     '''
     This function creates a local dask cluster.
     '''
@@ -81,7 +81,10 @@ def create_dask_cluster(logger=None, n_workers=None):
         logger.info(client)
         logger.info(client.dashboard_link)
 
-    return client
+    if not return_cluster:
+        return client
+    else:
+        return cluster, client
 
 
 def checkpoint_log(logger, timer=None, message=''):
