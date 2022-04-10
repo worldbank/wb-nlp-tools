@@ -80,7 +80,7 @@ def create_dask_cluster(logger=None, n_workers=None, return_cluster=False):
 
     # Prevent potential blocking of the server, so reduce num_workers if
     # it's greater than the server's cpu count.
-    n_workers = max(1, n_workers - 4) if n_workers > cpu_count else n_workers
+    n_workers = max(1, cpu_count - 4) if n_workers > cpu_count else n_workers
 
     cluster = LocalCluster(n_workers=n_workers, dashboard_address=':8887',
                            threads_per_worker=1, processes=True, memory_limit=0)
