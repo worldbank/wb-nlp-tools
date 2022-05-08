@@ -5,8 +5,13 @@
 
 from __future__ import annotations
 
+from datetime import date
 from pydantic import BaseModel, Field
 from typing import Any, List, Optional
+
+
+class AliasItem(BaseModel):
+    alias: str = Field(None, description="An alternative name for the indicator or series being documented.")
 
 
 class IndicatorItem(BaseModel):
@@ -16,13 +21,14 @@ class IndicatorItem(BaseModel):
 
 
 class AcronymItem(BaseModel):
-    acronym: str
-    expansion: str
+    acronym: str = Field(..., description='An acronym referenced in the series metadata (e.g. "GDP").')
+    expansion: str = Field(..., description='The expansion of the acronym, i.e. the full name or title that it represents (e.g., "Gross Domestic Product").')
+    occurence: int = Field(None, description="This numeric element can be used to indicate the number of times the acronym is mentioned in the metadata. The element will rarely be used.")
 
 
 class LicenseItem(BaseModel):
-    name: List[str]
-    uri: List[str]
+    name: str = Field(None, description='The name of the license, e.g. "Creative Commons Attribution 4.0 International license (CC-BY 4.0)".')
+    uri: str = Field(None, description='The URL of a website where the licensed is described in detail, for example "https://creativecommons.org/licenses/by/4.0/".')
 
 
 class GeographicUnit(BaseModel):
@@ -32,64 +38,141 @@ class GeographicUnit(BaseModel):
 
 
 class TimePeriod(BaseModel):
-    start: List[str]
-    end: List[str]
+    start: date = Field(None, description="The initial date of the series in the dataset. The start date should be entered in ISO 8601 format (YYYY-MM-DD or YYYY-MM or YYYY).")
+    end: date = Field(None, description="The end date is the latest date for which an estimate for the indicator is available. The end date should be entered in ISO 8601 format (YYYY-MM-DD or YYYY-MM or YYYY).")
 
 
-class Keyword(BaseModel):
-    name: List[str]
+class KeywordItem(BaseModel):
+    name: str = Field(..., description="Keyword (or phrase). Keywords summarize the content or subject matter of the study.")
+    vocab: str = Field(None, description="Controlled vocabulary from which the keyword is extracted, if any.")
+    uri: str = Field(None, description="The URI of the controlled vocabulary used, if any.")
 
 
 class DefinitionReference(BaseModel):
-    uri: List[str]
+    source: str = Field(None, description="The source of the definition (title, or label).")
+    uri: str = Field(None, description="A link (URL) to the source of the definition.")
+    note: str = Field(None, description="This element provides for annotating or explaining the reason the reference has been included as part of the metadata.")
 
 
 class ApiDocumentation(BaseModel):
-    description: List[str]
-    uri: List[str]
+    description: str = Field(None, description="This element will not contain the API documentation itself, but information on what documentation is available.")
+    uri: str = Field(None, description="The URL of the API documentation.")
 
 
-class Topic(BaseModel):
-    id: List[str]
-    name: List[str]
-    vocabulary: List[str]
+class TopicItem(BaseModel):
+    id: str = Field(None, description="The unique identifier of the topic. It can be a sequential number, or the ID of the topic in a controlled vocabulary.")
+    name: str = Field(None, description="The label of the topic associated with the data.")
+    parent_id: str = Field(None, description="When a hierarchical (nested) controlled vocabulary is used, the parent_id field can be used to indicate a higher-level topic to which this topic belongs.")
+    vocabulary: str = Field(None, description="The name of the controlled vocabulary used, if any.")
+    uri: str = Field(None, description="A link to the controlled vocabulary mentioned in field vocabulary.")
+
+
+class DimensionItem(BaseModel):
+    label: str = Field(None, description='The label of the disaggregation level, for example "sex", or "urban/rural".')
+    description: str = Field(None, description='A description of the disaggregation level (for example, if the label was "age group", the description can provide detailed information on the age groups, e.g. "The age groups in the database are 0-14, 15-49, 50-64, and 65+ years old".)')
+
+
+class ConceptItem(BaseModel):
+    name: str = Field(None, description="A concise and standardized name (label) for the concept.")
+    definition: str = Field(None, description="The definition of the concept.")
+    uri: str = Field(None, description="A link (URL) to a resource providing more detailed information on the concept.")
+
+
+class ThemeItem(BaseModel):
+    id: str = Field(None, description="The unique identifier of the theme. It can be a sequential number, or the ID of the theme in a controlled vocabulary.")
+    name: str = Field(None, description="The label of the theme associated with the data.")
+    parent_id: str = Field(None, description="When a hierarchical (nested) controlled vocabulary is used, the parent_id field can be used to indicate a higher-level theme to which this theme belongs.")
+    vocabulary: str = Field(None, description="The name of the controlled vocabulary used, if any.")
+    uri: str = Field(None, description="A link to the controlled vocabulary mentioned in field `vocabulary`.")
+
+
+class DisciplineItem(BaseModel):
+    id: str = Field(None, description="The ID of the discipline, preferably taken from a controlled vocabulary.")
+    name: str = Field(None, description="The name (label) of the discipline, preferably taken from a controlled vocabulary.")
+    parent_id: str = Field(None, description="The parent ID of the discipline (ID of the item one level up in the hierarchy), if a hierarchical controlled vocabulary is used.")
+    vocabulary: str = Field(None, description="The name (including version number) of the controlled vocabulary used, if any.")
+    uri: str = Field(None, description="The URL to the controlled vocabulary used, if any.")
+
+
+class CountryItem(BaseModel):
+    name: str = Field(None, description="The name of the country.")
+    code: str = Field(None, description="The code of the country. The use of the ISO 3166-1 alpha-3 codes is recommended.")
+
+
+class LinkItem(BaseModel):
+    type: str = Field(None, description="This element allows to classify the link that is provided.")
+    description: str = Field(None, description="A description of the link that is provided.")
+    uri: str = Field(None, description="The uri (URL) to the described resource.")
+
+
+class AuthoringEntity(BaseModel):
+    name: str = Field(None, description="The name of the person or organization who is responsible for the production of the indicator or series. Write the name in full (use the element abbreviation to capture the acronym of the organization, if relevant).")
+    affiliation: str = Field(None, description="The affiliation of the person or organization mentioned in name.")
+    abbreviation: str = Field(None, description="Abbreviated name (acronym) of the organization mentioned in name.")
+    email: str = Field(None, description="The public email contact of the person or organizations mentioned in name. It is good practice to provide a service account email address, not a personal one.")
+    uri: str = Field(None, description="A link (URL) to the website of the entity mentioned in name.")
+
+
+class SourceItem(BaseModel):
+    id: str = Field(..., description="This element records the unique identifier of a source. It is a required element. If the source does not have a specific unique identifier, a sequential number can be used. If the source is a dataset or database that has its own unique identifier (possibly a DOI), this identifier should be used.")
+    name: str = Field(None, description="The name (title, or label) of the source.")
+    organization: str = Field(None, description="The organization responsible for the source data.")
+    type: str = Field(None, description='The type of source, e.g. "household survey", "administrative data", or "external database".')
+    note: str = Field(None, description="This element can be used to provide additional information regarding the source data.")
 
 
 class SeriesDescription(BaseModel):
-    idno: List[str]
-    name: List[str]
-    database_id: str
-    measurement_unit: List[str]
-    periodicity: List[str]
-    base_period: List[Any]  # missing in schema
-    # definition_short: List[str]  # not in script
-    definition_references: List[DefinitionReference]
+    """Definitions for an indicator metadata based from: https://mah0001.github.io/schema-guide/chapter07.html#series-description
+    """
 
-    definition_long: List[str]  # missing in schema
+    idno: str = Field(..., description="A unique identifier (ID) for the series.")
+    doi: str = Field(None, description="A Digital Object Identifier (DOI) for the the series.")
+    name: str = Field(..., description="The name (label) of the series. Note that a field alias is provided (see below) to capture alternative names for the series.")
+    database_id: str = Field(None, description="The unique identifier of the database the series belongs to.")
+    aliases: List[AliasItem] = Field(None, description="A series or an indicator can be referred to using different names. The aliases element is provided to capture the multiple names and labels that may be associated with (i.e synomyms of) the documented series or indicator.")
 
-    methodology: List[str]
-    limitation: List[str]
-    topics: List[Topic]
-    relevance: List[str]
-    time_periods: List[TimePeriod]
-    geographic_units: List[GeographicUnit]
-    license: List[LicenseItem]
-    api_documentation: ApiDocumentation
+    measurement_unit: str = Field(None, description="The unit of measurement. Note that in many databases the measurement unit will be included in the series name/label.")
+    dimensions: List[DimensionItem] = Field(None, description='This is used to provide an itemized list of disaggregations that correspond exactly to the published data. Note that when an indicator is available at two "non-overlapping" levels of disaggregation, it should be split into two indicators.')
+    periodicity: str = Field(None, description="The periodicity of the series. It is recommended to use a controlled vocabulary with values like annual, quarterly, monthly, daily, etc.")
 
-    # source: str  # not in script
-    keywords: List[Keyword]
+    base_period: str = Field(None, description="The base period for the series. This field will only apply to series that require a base year (or other reference time) used as a benchmark, like a Consumer Price Index (CPI) which will have a value of 100 for a reference base year.")  # missing in schema
+    definition_short: str = Field(None, description="A short definition of the series. The short definition captures the essence of the series.")  # not in script
+    definition_long: str = Field(None, description="A long(er) version of the definition of the series. If only one definition is available (not a short/long version), it is recommended to capture it in the definition_short element. ALternatively, the same definition can be stored in both definition_short and definition_long.")  # missing in schema
 
-    # acronyms: List[AcronymItem]  # not in script
+    definition_references: List[DefinitionReference] = Field(None, description="This element is provided to link to an external resources from which the definition was extracted.")
+
+    statistical_concept: str = Field(None, description="This element allows to insert a reference of the series with content of a statistical character. This can include coding concepts or standards that are applied to render the data statistically relevant.")
+    concepts: List[ConceptItem] = Field(None, description='This repeatable element can be used to document concepts related to the indicators or time series (other than the main statistical concept that may have been entered in statisticsl_concept). For example, the concept of malnutrition could be documented in relation to the indicators "Prevalence of stunting" and "Prevalence of wasting".')
+    methodology: str = Field(None, description="This element documents methodological details on the production of the series or indicator.")
+    imputation: str = Field(None, description="Data may have been imputed to account for data gaps or for other reasons (harmonization/standardization, and others). If imputations have been made, this element provides the space for their description.")  # missing in schema
+    missing: str = Field(None, description="Information on missing values in the series or indicator. This information can be related to treatment of missing values, to the cause(s) of missing values, and others.")  # missing in schema
+    quality_checks: str = Field(None, description="Data may have gone through data quality checks to assure that the values are reasonable and coherent, which can be described in this element. These quality checks may include checking for outlying values or other. A brief description of such quality control procedures will contribute to reinforcing the credibility of the data being disseminated.")  # missing in schema
+    quality_note: str = Field(None, description="Additional notes or an overall statement on data quality. These could for example cover non-standard quality notes and/or information on independent reviews on the data quality.")  # missing in schema
+    sources_discrepancies: str = Field(None, description="This element is used to describe and explain why the data in the series may be different from the data for the same series published in other sources. International organizations, for example, may apply different techniques to make data obtained from national sources comparable across countries, in which cases the data published in international databases may differ from the data published in national, official databases.")
+    series_break: str = Field(None, description="Breaks in statistical series occur when there is a change in the standards, sources of data, or reference year used in the compilation of a series. Breaks in series must be well documented. The documentation should include the reason(s) for the break, the time it occured, and information on the impact on comparability of data over time.")  # missing in schema
+    limitation: str = Field(None, description="This element is used to communicate to the user any limitations or exceptions in using the data. The limitations may result from the methodology, from issues of quality or consistency in the data source, or other.")
+    themes: List[ThemeItem] = Field(None, description="Themes provide a general idea of the research that might guide the creation and/or demand for the series. A theme is broad and is likely also subject to a community based definition or list. A controlled vocabulary should be used. This element will rarely be used (the element topics described below will be used more often).")
+    topics: List[TopicItem] = Field(None, description="The topics field indicates the broad substantive topic(s) that the indicator/series covers. A topic classification facilitates referencing and searches in electronic survey catalogs. Topics should be selected from a standard controlled vocabulary such as the Council of European Social Science Data Archives (CESSDA) topics classification.")
+    disciplines: List[DisciplineItem] = Field(None, description="Information on the academic disciplines related to the content of the document. A controlled vocabulary will preferably be used, for example the one provided by the list of academic fields in Wikipedia.")
+    relevance: str = Field(None, description="This field documents the relevance of an indicator or series in relation to a social imperative or policy objective.")
+    time_periods: List[TimePeriod] = Field(None, description="The time period covers the entire span of data available for the series. The time period has a start and an end and is reported according to the periodicity provided in a previous element.")
+    ref_country: List[CountryItem] = Field(None, description="A list of countries for which data are available in the series. This element is somewhat redundant with the next element (geographic_units) which may also contain a list of countries. Identifying geographic areas of type “country” is important to enable filters and facets in data catalogs (country names are among the most frequent queries submitted to catalogs).")
+    geographic_units: List[GeographicUnit] = Field(None, description="List of geographic units (regions, countries, states, provinces, etc.) for which data are available for the series.")
+    aggregation_method: str = Field(None, description="The aggregation_method element describes how values can be aggregated from one geographic level (for example, a country) to a higher-level geographic area (for example, a group of country defined based on a geographic criteria (region, world) or another criteria (low/medium/high-income countries, island countries, OECD countries, etc.). The aggregation method can be simple (like “sum” or “population-weighted average”) or more complex, involving weighting of values.")  # missing in schema
+    disaggregation: str = Field(None, description="This element is intended to inform users that an indicator or series is available at various levels of disaggregation. The related series should be listed (by andme and/or identifier). For indicator “Population, total” for example, one may inform the user that the indicator is also available (in other series) by sex, urban/rural, and age group (in series “Population, male” and “Population, female”, etc.).")
+    license: List[LicenseItem] = Field(None, description="The license refers to the accessibility and terms of use associated with the data. Providing a license and a link to the terms of the license allos data users to determine, with full clarity, what they can and cannot do with the data.")
+    confidentiality: str = Field(None, description="A statement of confidentiality for the series.")
+    confidentiality_status: str = Field(None, description='This indicates a confidentiality status for the series. A controlled vocabulary should be used with possible options "public", "official use only", "confidential", "strictly confidential". When all series are made publicly available, and belong to a database that has an open or public access policy, this element can be ignored.')
+    confidentiality_note: str = Field(None, description="This element is reserved for additional notes regarding confidentiality of the data. This could involve references to specific laws and circumstances regarding the use of data.")
+    links: List[LinkItem] = Field(None, description="This element provides links to online resources of any type that could be useful to the data users. This can be links to description of methods and reference documents, analytics tools, visualizations, data sources, or other.")
+    api_documentation: ApiDocumentation = Field(None, description="Increasingly, data are made accessible via Application Programming Interfaces (APIs). The API associated with a series must be documented. The documentation will usually not be specific to a series, but apply to all series in a same database.")
+    authoring_entity: List[AuthoringEntity] = Field(None, description="This set of five elements is used to identify the organization(s) or person(s) who are the main producers/curators of the indicator. Note that a similar element is provided at the database level. The authoring_entity for the indicator can be different from the authoring_entity of the database. For example, the World Bank is the authoring entity for the World Development Indicators database, which contains indicators obtained from the International Monetary Fund, World Health Organization, and other organizations that are thus the authoring entitis for specific indicators.")
+    source: List[SourceItem] = Field(None, description="This element provides information on the source(s) of data that were used to generate the indicator. A source can refer to an organization (e.g., “Source: World Health Organization”), or to a dataset (e.g., for a national poverty headcount indicator, the sources will likely be a list of sample household surveys).")   # not in script
+    sources_note: str = Field(None, description="Additional information on the source(s) of data used to generate the series or indicator.")
+    keywords: List[KeywordItem] = Field(None, description="Words or phrases that describe salient aspects of a data collection's content. Can be used for building keyword indexes and for classification and retrieval purposes. A controlled vocabulary can be employed. Keywords should be selected from a standard thesaurus, preferably an international, multilingual thesaurus.")
+    acronyms: List[AcronymItem] = Field(None, description='The acronyms element is used to document the meaning of all acronyms used in the metadata of a series. If some acronyms are well known (like "GDP", or "IMF" for example), others may be less obvious or could be uncertain (does "PPP" mean "public-private partnership", or "purchasing power parity"?). In any case, providing a list of acronyms with their meaning will help users and make your metadata more discoverable. Note that acronyms should not include country codes used in the documentation of the geographic coverage of the data.')  # not in script
     # related_indicators: List[IndicatorItem]  # not in script
     # framework: List[Any]  # not in script
-
-    imputation: List[Any]  # missing in schema
-    missing: List[Any]  # missing in schema
-    quality_checks: List[Any]  # missing in schema
-    quality_note: List[Any]  # missing in schema
-    series_break: List[Any]  # missing in schema
-    aggregation_method: List[Any]  # missing in schema
-    aliases: List  # missing in schema
 
 
 class IndicatorsSchema(BaseModel):
