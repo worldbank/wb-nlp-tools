@@ -171,8 +171,13 @@ class SeriesDescription(BaseModel):
     sources_note: str = Field(None, description="Additional information on the source(s) of data used to generate the series or indicator.")
     keywords: List[KeywordItem] = Field(None, description="Words or phrases that describe salient aspects of a data collection's content. Can be used for building keyword indexes and for classification and retrieval purposes. A controlled vocabulary can be employed. Keywords should be selected from a standard thesaurus, preferably an international, multilingual thesaurus.")
     acronyms: List[AcronymItem] = Field(None, description='The acronyms element is used to document the meaning of all acronyms used in the metadata of a series. If some acronyms are well known (like "GDP", or "IMF" for example), others may be less obvious or could be uncertain (does "PPP" mean "public-private partnership", or "purchasing power parity"?). In any case, providing a list of acronyms with their meaning will help users and make your metadata more discoverable. Note that acronyms should not include country codes used in the documentation of the geographic coverage of the data.')  # not in script
-    # related_indicators: List[IndicatorItem]  # not in script
-    # framework: List[Any]  # not in script
+
+    # notes: List[NoteItem] = Field(None, description="")
+    # related_indicators: List[IndicatorItem] = Field(None, description="")  # not in script
+    # compliance: List[ComplianceItem] = Field(None, description="")  # not in script
+    # framework: List[FrameworkItem] = Field(None, description="")  # not in script
+    # lda_topics: List[LdaTopicItem] = Field(None, description="")  # not in script
+    # embeddings: List[EmbeddingItem] = Field(None, description="")  # not in script
 
 
 class IndicatorsSchema(BaseModel):
